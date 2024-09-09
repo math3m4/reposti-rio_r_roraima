@@ -1,0 +1,92 @@
+---
+title: "Github Pages - Aula 11"
+author: "CURSO R"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) # mude para true e coloque textos
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(reactable)
+library(ggplot2)
+
+dados <- read_excel( "valor_da_marca.xlsx")
+
+library(forcats)
+
+dados <- dados %>%
+  mutate(`Renda pessoal bruta:` = fct_relevel(`Renda pessoal bruta:`, 
+                                         "até R$ 998", 
+                                         "de RS 999 a R$ 4.990",
+                                         "de RS 4.990 a R$ 9.980",
+                                         "de R$ 9.981 a R$ 14.970",
+                                         "acima de R$ 14.971"))
+
+
+```
+
+
+## Limpando os nomes
+
+```{r}
+
+valor <- clean_names(dados)
+
+reactable(valor, 
+          defaultColDef = colDef(style = list(fontSize = "12px")),  # Define o tamanho da fonte
+          bordered = TRUE,  # Adiciona bordas à tabela
+          striped = TRUE,   # Aplica uma formatação com listras
+          highlight = TRUE  # Realça a linha ao passar o mouse
+)
+
+```
+
+
+
+## Análise da Idade
+
+
+```{r}
+
+media <- mean( valor$idade, na.rm= T)
+
+media
+
+
+```
+
+## Análise da Renda
+
+
+```{r}
+
+
+
+tabela <- valor %>% 
+  group_by( renda_pessoal_bruta) %>% 
+  summarise( Quantidade = n() )
+
+reactable(tabela)
+
+```
+
+
+
+
+# Renda x Idade
+
+```{r}
+
+ggplot(valor) +
+  aes(x = idade, y = renda_pessoal_bruta) +
+  geom_boxplot(fill = "#46337E") +
+  labs(title = "IDADE X RENDA") +
+  scale_y_discrete(limits = rev(levels(valor$renda_pessoal_bruta))) +  # reverter a ordem no eixo Y
+  theme_minimal()
+
+
+```
+
